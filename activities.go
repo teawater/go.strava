@@ -310,17 +310,25 @@ func (c *ActivitiesPutCall) Do() (*ActivityDetailed, error) {
 type ActivitiesListPhotosCall struct {
 	service *ActivitiesService
 	id      int64
+	ops     map[string]interface{}
 }
 
 func (s *ActivitiesService) ListPhotos(activityId int64) *ActivitiesListPhotosCall {
 	return &ActivitiesListPhotosCall{
 		service: s,
 		id:      activityId,
+		ops:     make(map[string]interface{}),
 	}
 }
 
+func (c *ActivitiesListPhotosCall) Size(size uint) *ActivitiesListPhotosCall {
+	c.ops["size"] = size
+	return c
+}
+
 func (c *ActivitiesListPhotosCall) Do() ([]*PhotoSummary, error) {
-	data, err := c.service.client.run("GET", fmt.Sprintf("/activities/%d/photos", c.id), nil)
+	c.ops["photo_sources"] = true
+	data, err := c.service.client.run("GET", fmt.Sprintf("/activities/%d/photos", c.id), c.ops)
 	if err != nil {
 		return nil, err
 	}
